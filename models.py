@@ -5,11 +5,11 @@
 The models used for music generation.
 """
 
-from keras import backend as K
-from keras.layers import Input, Dense, Activation, Dropout, Flatten, Reshape, TimeDistributed, Lambda
-from keras.layers.embeddings import Embedding
-from keras.layers.normalization import BatchNormalization
-from keras.models import Model
+from tensorflow.keras import backend as K
+from tensorflow.python.keras.layers import Input, Dense, Activation, Dropout, Flatten, Reshape, TimeDistributed, Lambda
+from tensorflow.python.keras.layers.embeddings import Embedding
+from tensorflow.python.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.models import Model
 
 
 def vae_sampling(args):
@@ -67,9 +67,13 @@ def create_autoencoder_model(input_shape, latent_space_size, dropout_rate, max_w
             x = BatchNormalization(momentum=batchnorm_momentum, name='encoder')(x)
     print(K.int_shape(x))
 
+
+    encoder = Model(x_in, x, name='encoder_model')
     # LATENT SPACE
 
-    x = Dense(1600, name='decoder')(x)
+    latent_inputs = Input(shape=(latent_space_size,), name='z_sampling')
+    x = Dense(1600, name='decoder')(latent_inputs)
+    #x = Dense(1600, name='decoder')(x)
     x = BatchNormalization(momentum=batchnorm_momentum)(x)
     x = Activation('relu')(x)
     if dropout_rate > 0:
@@ -96,7 +100,14 @@ def create_autoencoder_model(input_shape, latent_space_size, dropout_rate, max_w
     print(K.int_shape(x))
     x = Reshape((input_shape[0], input_shape[1], input_shape[2]))(x)
     print(K.int_shape(x))
+    
+    decoder  = Model(latent_inputs, x, name='decoder')
+    
+    model = Model(x_in, decoder(encoder(x_in)), name='autoencoder')
 
-    model = Model(x_in, x)
+    #model = Model(x_in, x)
+    encoder.summary()
+    decoder.summary()
+    model.summary()
 
-    return model
+    return model, encoder, decoder

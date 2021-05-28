@@ -19,15 +19,15 @@ import argparse
 #  Load Keras
 print("Loading keras...")
 import os
-import keras
+from tensorflow import keras
 
 print("Keras version: " + keras.__version__)
 
-from keras.models import Model, load_model
-from keras.utils import plot_model
-from keras import backend as K
-from keras.losses import binary_crossentropy
-from keras.optimizers import Adam, RMSprop
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras import backend as K
+from tensorflow.keras.losses import binary_crossentropy
+from tensorflow.keras.optimizers import Adam, RMSprop
 
 EPOCHS_QTY = 2000
 EPOCHS_TO_SAVE = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450]
@@ -257,7 +257,7 @@ def train(samples_path='data/interim/samples.npy', lengths_path='data/interim/le
     else:
         print("Building model...")
 
-        model = models.create_autoencoder_model(input_shape=y_shape[1:],
+        model, encoder, decoder = models.create_autoencoder_model(input_shape=y_shape[1:],
                                                 latent_space_size=LATENT_SPACE_SIZE,
                                                 dropout_rate=DROPOUT_RATE,
                                                 max_windows=MAX_WINDOWS,
@@ -281,8 +281,9 @@ def train(samples_path='data/interim/samples.npy', lengths_path='data/interim/le
 
     #  train
     print("Referencing sub-models...")
-    decoder = K.function([model.get_layer('decoder').input, K.learning_phase()], [model.layers[-1].output])
-    encoder = Model(inputs=model.input, outputs=model.get_layer('encoder').output)
+    #decoder = K.function([model.get_layer('decoder').input, K.learning_phase()], [model.layers[-1].output])
+    #decoder = Model(model.get_layer('decoder').input, model.layers[-1].output)
+    #encoder = Model(inputs=model.input, outputs=model.get_layer('encoder').output)
 
     random_vectors = np.random.normal(0.0, 1.0, (NUM_RAND_SONGS, LATENT_SPACE_SIZE))
     np.save('data/interim/random_vectors.npy', random_vectors)
