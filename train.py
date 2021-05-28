@@ -120,8 +120,8 @@ def generate_random_songs(decoder, write_dir, random_vectors):
     """
     for i in range(random_vectors.shape[0]):
         random_latent_x = random_vectors[i:i + 1]
-        y_song = decoder([random_latent_x, 0])[0]
-        midi_utils.samples_to_midi(y_song[0], write_dir + 'random_vectors' + str(i) + '.mid', 32)
+        y_song = decoder(random_latent_x)[0]
+        midi_utils.samples_to_midi(y_song, write_dir + 'random_vectors' + str(i) + '.mid', 32)
 
 
 def calculate_and_store_pca_statistics(encoder, x_orig, y_orig, write_dir):
@@ -269,9 +269,9 @@ def train(samples_path='data/interim/samples.npy', lengths_path='data/interim/le
                                                 embedding_shape=x_train.shape[0])
 
         if USE_VAE:
-            model.compile(optimizer=Adam(lr=learning_rate), loss=vae_loss)
+            model.compile(optimizer=Adam(learning_rate=learning_rate), loss=vae_loss)
         else:
-            model.compile(optimizer=RMSprop(lr=learning_rate), loss='binary_crossentropy')
+            model.compile(optimizer=RMSprop(learning_rate=learning_rate), loss='binary_crossentropy')
 
         # plot model with graphvis if installed
         try:
@@ -346,15 +346,15 @@ def train(samples_path='data/interim/samples.npy', lengths_path='data/interim/le
 
             print("...Saved.")
 
-            if USE_EMBEDDING:
-                y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
-            else:
-                y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
+            #if USE_EMBEDDING:
+            #    y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
+            #else:
+            #    y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
 
-            plot_utils.plot_samples(write_dir + 'test', y_song)
-            midi_utils.samples_to_midi(y_song, write_dir + 'test.mid')
+            #plot_utils.plot_samples(write_dir + 'test', y_song)
+            #midi_utils.samples_to_midi(y_song, write_dir + 'test.mid')
 
-            generate_normalized_random_songs(x_orig, y_orig, encoder, decoder, random_vectors, write_dir)
+            #generate_normalized_random_songs(x_orig, y_orig, encoder, decoder, random_vectors, write_dir)
 
     print("...Done.")
 
