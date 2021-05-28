@@ -9,6 +9,7 @@ import random
 
 import numpy as np
 from matplotlib import pyplot as plt
+import tqdm
 
 import midi_utils
 import plot_utils
@@ -118,7 +119,7 @@ def generate_random_songs(decoder, write_dir, random_vectors):
     :param random_vectors:
     :return:
     """
-    for i in range(random_vectors.shape[0]):
+    for i in tqdm.tqdm(range(random_vectors.shape[0])):
         random_latent_x = random_vectors[i:i + 1]
         y_song = decoder(random_latent_x)[0]
         midi_utils.samples_to_midi(y_song, write_dir + 'random_vectors' + str(i) + '.mid', 32)
@@ -346,15 +347,15 @@ def train(samples_path='data/interim/samples.npy', lengths_path='data/interim/le
 
             print("...Saved.")
 
-            #if USE_EMBEDDING:
-            #    y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
-            #else:
-            #    y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
-
-            #plot_utils.plot_samples(write_dir + 'test', y_song)
-            #midi_utils.samples_to_midi(y_song, write_dir + 'test.mid')
-
-            #generate_normalized_random_songs(x_orig, y_orig, encoder, decoder, random_vectors, write_dir)
+            if USE_EMBEDDING:
+                y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
+            else:
+                y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
+ 
+            plot_utils.plot_samples(write_dir + 'test', y_song)
+            midi_utils.samples_to_midi(y_song, write_dir + 'test.mid')
+ 
+            generate_normalized_random_songs(x_orig, y_orig, encoder, decoder, random_vectors, write_dir)
 
     print("...Done.")
 
